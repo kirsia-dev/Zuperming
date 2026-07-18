@@ -23,7 +23,7 @@ local Custom = {} do
   function Custom:SetTheme(ThemeName)
     local Color = Custom.Themes[ThemeName]
     if not Color then
-      warn("[ZuperMing] Theme '" .. tostring(ThemeName) .. "' tidak ditemukan!")
+      warn("[ZuperMing] Theme '" .. tostring(ThemeName) .. "' Not Found!")
       return
     end
     Custom.ColorRGB = Color
