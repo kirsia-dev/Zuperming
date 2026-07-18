@@ -6,7 +6,35 @@ local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 
 local Custom = {} do
-  Custom.ColorRGB = Color3.fromRGB(250, 7, 7)
+  Custom.ColorRGB = Color3.fromRGB(255, 30, 110)
+
+  Custom.Themes = {
+    Magenta = Color3.fromRGB(255, 30, 110),
+    Cyan    = Color3.fromRGB(0, 180, 255),
+    Grey    = Color3.fromRGB(160, 160, 160),
+  }
+
+  Custom.ThemeListeners = {}
+
+  function Custom:RegisterThemeListener(func)
+    table.insert(Custom.ThemeListeners, func)
+  end
+
+  function Custom:SetTheme(ThemeName)
+    local Color = Custom.Themes[ThemeName]
+    if not Color then
+      warn("[ZuperMing] Theme '" .. tostring(ThemeName) .. "' tidak ditemukan!")
+      return
+    end
+    Custom.ColorRGB = Color
+    for _, func in ipairs(Custom.ThemeListeners) do
+      pcall(func, Color)
+    end
+  end
+
+  function Custom:AddTheme(ThemeName, Color)
+    Custom.Themes[ThemeName] = Color
+  end
 
   function Custom:Create(Name, Properties, Parent)
     local _instance = Instance.new(Name)
@@ -40,7 +68,7 @@ local function OpenClose()
 
   local Close_ImageButton = Custom:Create("ImageButton", {
     BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-    BorderColor3 = Color3.fromRGB(255, 0, 0),
+    BorderColor3 = Color3.fromRGB(255, 30, 110),
     BackgroundTransparency = 1,
     Position = UDim2.new(0.1021, 0, 0.0743, 0),
     Size = UDim2.new(0, 50, 0, 50),
@@ -155,11 +183,11 @@ function CircleClick(Button, X, Y)
 	end)
 end
 
-local Speed_Library, Notification = {}, {}
+local ZuperMing, Notification = {}, {}
 
-Speed_Library.Unloaded = false
+ZuperMing.Unloaded = false
 
-function Speed_Library:SetNotification(Config)
+function ZuperMing:SetNotification(Config)
   local Title = Config[1] or Config.Title or ""
   local Description = Config[2] or Config.Description or ""
 	local Content = Config[3] or Config.Content or ""
@@ -375,7 +403,7 @@ function Speed_Library:SetNotification(Config)
   return Notification
 end
 
-function Speed_Library:CreateWindow(Config)
+function ZuperMing:CreateWindow(Config)
   local Title = Config[1] or Config.Title or ""
   local Description = Config[2] or Config.Description or ""
   local TabWidth = Config[3] or Config["Tab Width"] or 120
@@ -383,7 +411,7 @@ function Speed_Library:CreateWindow(Config)
 
   local Funcs = {}
 
-  local SpeedHubXGui = Custom:Create("ScreenGui", {
+  local ZuperMingGui = Custom:Create("ScreenGui", {
     ZIndexBehavior = Enum.ZIndexBehavior.Sibling
   }, RunService:IsStudio() and Player.PlayerGui or (gethui() or cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")))
 
@@ -393,8 +421,8 @@ function Speed_Library:CreateWindow(Config)
     Size = UDim2.new(0, 455, 0, 350),
     ZIndex = 0,
     Name = "DropShadowHolder",
-    Position = UDim2.new(0, (SpeedHubXGui.AbsoluteSize.X // 2 - 455 // 2), 0, (SpeedHubXGui.AbsoluteSize.Y // 2 - 350 // 2))
-  }, SpeedHubXGui)
+    Position = UDim2.new(0, (ZuperMingGui.AbsoluteSize.X // 2 - 455 // 2), 0, (ZuperMingGui.AbsoluteSize.Y // 2 - 350 // 2))
+  }, ZuperMingGui)
 
   local DropShadow = Custom:Create("ImageLabel", {
     Image = "",
@@ -628,15 +656,24 @@ function Speed_Library:CreateWindow(Config)
 
   Close.Activated:Connect(function()
 		CircleClick(Close, Player:GetMouse().X, Player:GetMouse().Y)
-    if SpeedHubXGui then SpeedHubXGui:Destroy() end
-		if not Speed_Library.Unloaded then Speed_Library.Unloaded = true end
+    if ZuperMingGui then ZuperMingGui:Destroy() end
+		if not ZuperMing.Unloaded then ZuperMing.Unloaded = true end
 	end)
 
   DropShadowHolder.Size = UDim2.new(0, 115 + TextLabel.TextBounds.X + 1 + TextLabel1.TextBounds.X, 0, 350)
 	MakeDraggable(Top, DropShadowHolder)
 
-
-  -- /// Blur
+  Custom:RegisterThemeListener(function(Color)
+    TextLabel1.TextColor3 = Color
+    for _, s in pairs(ScrollTab:GetChildren()) do
+      local cf = s:FindFirstChild("ChooseFrame")
+      if cf then
+        cf.BackgroundColor3 = Color
+        local st = cf:FindFirstChildOfClass("UIStroke")
+        if st then st.Color = Color end
+      end
+    end
+  end)
 
   local MoreBlur = Custom:Create("Frame", {
     AnchorPoint = Vector2.new(1, 1),
@@ -755,8 +792,6 @@ function Speed_Library:CreateWindow(Config)
     Name = "DropPageLayout",
     Parent = DropdownFolder
   })
-
-  -- /// Create Tab
 
   local Tabs = {}
   local CountTab = 0
@@ -902,8 +937,6 @@ function Speed_Library:CreateWindow(Config)
       end
     end)
 
-    --- /// Section
-   
     local Sections, CountSection = {}, 0
 
     function Sections:AddSection(Title, OpenSection)
@@ -1433,7 +1466,6 @@ function Speed_Library:CreateWindow(Config)
           Size = UDim2.new(1, 0, 1, 0)
         }, Toggle)
 
-        
 				local FeatureFrame2 = Custom:Create("Frame", {
 					Name = "FeatureFrame2",
 					AnchorPoint = Vector2.new(1, 0.5),
@@ -1482,6 +1514,14 @@ function Speed_Library:CreateWindow(Config)
           TweenService:Create(FeatureFrame2, tweenInfo, {BackgroundColor3 = FrameColor, BackgroundTransparency = FrameTransparency}):Play()
         end
       
+        Custom:RegisterThemeListener(function(Color)
+          if Funcs_Toggle.Value then
+            UIStroke8.Color = Color
+            FeatureFrame2.BackgroundColor3 = Color
+            ToggleTitle.TextColor3 = Color
+          end
+        end)
+
         ToggleButton.Activated:Connect(function()
           CircleClick(ToggleButton, Player:GetMouse().X, Player:GetMouse().Y)
           Funcs_Toggle.Value = not Funcs_Toggle.Value
@@ -1583,7 +1623,6 @@ function Speed_Library:CreateWindow(Config)
           CornerRadius = UDim.new(0, 2),
         }, SliderInput)
 
-         
 				local TextBox = Custom:Create("TextBox", {
 					Font = Enum.Font.GothamBold,
 					Text = "90",
@@ -1703,6 +1742,12 @@ function Speed_Library:CreateWindow(Config)
           end
         end)
         
+        Custom:RegisterThemeListener(function(Color)
+          SliderInput.BackgroundColor3 = Color
+          SliderDraggable.BackgroundColor3 = Color
+          SliderCircle.BackgroundColor3 = Color
+        end)
+
         Funcs_Slider:Set(tonumber(Default))
         Callback(Funcs_Slider.Value)
 
@@ -1795,7 +1840,6 @@ function Speed_Library:CreateWindow(Config)
           Name = "InputFrame"
         }, Input)
     
-
         Custom:Create("UICorner", {
           CornerRadius = UDim.new(0, 4)
         }, InputFrame)
@@ -1833,6 +1877,142 @@ function Speed_Library:CreateWindow(Config)
 
         ItemCount += 1
 				return Funcs_Input
+      end
+
+      function Item:AddKeybind(Config)
+        local Title    = Config[1] or Config.Title    or ""
+        local Content  = Config[2] or Config.Content  or ""
+        local Default  = Config[3] or Config.Default  or Enum.KeyCode.RightShift
+        local Callback = Config[4] or Config.Callback or function() end
+
+        local Funcs_Keybind = {Value = Default, Listening = false}
+
+        local Keybind = Custom:Create("Frame", {
+          BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+          BackgroundTransparency = 0.935,
+          BorderSizePixel = 0,
+          LayoutOrder = ItemCount,
+          Size = UDim2.new(1, 0, 0, 35),
+          Name = "Keybind",
+        }, SectionAdd)
+
+        Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, Keybind)
+
+        Custom:Create("TextLabel", {
+          Font = Enum.Font.GothamBold,
+          Text = Title,
+          TextColor3 = Color3.fromRGB(230, 230, 230),
+          TextSize = 13,
+          TextXAlignment = Enum.TextXAlignment.Left,
+          TextYAlignment = Enum.TextYAlignment.Top,
+          BackgroundTransparency = 0.999,
+          BorderSizePixel = 0,
+          Position = UDim2.new(0, 10, 0, 10),
+          Size = UDim2.new(1, -180, 0, 13),
+          Name = "KeybindTitle",
+        }, Keybind)
+
+        Custom:Create("TextLabel", {
+          Font = Enum.Font.GothamBold,
+          Text = Content,
+          TextColor3 = Color3.fromRGB(255, 255, 255),
+          TextSize = 12,
+          TextTransparency = 0.6,
+          TextXAlignment = Enum.TextXAlignment.Left,
+          TextYAlignment = Enum.TextYAlignment.Bottom,
+          BackgroundTransparency = 0.999,
+          BorderSizePixel = 0,
+          Position = UDim2.new(0, 10, 0, 23),
+          Size = UDim2.new(1, -180, 0, 12),
+          Name = "KeybindContent",
+        }, Keybind)
+
+        local KeybindFrame = Custom:Create("Frame", {
+          AnchorPoint = Vector2.new(1, 0.5),
+          BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+          BackgroundTransparency = 0.92,
+          BorderSizePixel = 0,
+          Position = UDim2.new(1, -10, 0.5, 0),
+          Size = UDim2.new(0, 80, 0, 22),
+          Name = "KeybindFrame",
+        }, Keybind)
+
+        Custom:Create("UICorner", { CornerRadius = UDim.new(0, 4) }, KeybindFrame)
+
+        local KeybindStroke = Custom:Create("UIStroke", {
+          Color = Custom.ColorRGB,
+          Thickness = 1.5,
+          Transparency = 0,
+        }, KeybindFrame)
+
+        local KeybindLabel = Custom:Create("TextLabel", {
+          Font = Enum.Font.GothamBold,
+          Text = tostring(Default.Name),
+          TextColor3 = Custom.ColorRGB,
+          TextSize = 12,
+          AnchorPoint = Vector2.new(0.5, 0.5),
+          BackgroundTransparency = 0.999,
+          BorderSizePixel = 0,
+          Position = UDim2.new(0.5, 0, 0.5, 0),
+          Size = UDim2.new(1, -6, 1, -4),
+          Name = "KeybindLabel",
+        }, KeybindFrame)
+
+        local KeybindButton = Custom:Create("TextButton", {
+          Font = Enum.Font.SourceSans,
+          Text = "",
+          TextSize = 14,
+          BackgroundTransparency = 0.999,
+          BorderSizePixel = 0,
+          Size = UDim2.new(1, 0, 1, 0),
+          Name = "KeybindButton",
+        }, Keybind)
+
+        Custom:RegisterThemeListener(function(Color)
+          KeybindStroke.Color = Color
+          KeybindLabel.TextColor3 = Color
+        end)
+
+        local function SetListening(State)
+          Funcs_Keybind.Listening = State
+          if State then
+            KeybindLabel.Text = "..."
+            KeybindLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+            KeybindStroke.Color = Color3.fromRGB(200, 200, 200)
+            TweenService:Create(KeybindFrame, TweenInfo.new(0.15), {BackgroundTransparency = 0.75}):Play()
+          else
+            KeybindLabel.TextColor3 = Custom.ColorRGB
+            KeybindStroke.Color = Custom.ColorRGB
+            TweenService:Create(KeybindFrame, TweenInfo.new(0.15), {BackgroundTransparency = 0.92}):Play()
+          end
+        end
+
+        KeybindButton.Activated:Connect(function()
+          CircleClick(KeybindButton, Player:GetMouse().X, Player:GetMouse().Y)
+          SetListening(true)
+        end)
+
+        UserInputService.InputBegan:Connect(function(Input, gameProcessed)
+          if Funcs_Keybind.Listening then
+            if Input.UserInputType == Enum.UserInputType.Keyboard then
+              Funcs_Keybind.Value = Input.KeyCode
+              KeybindLabel.Text = tostring(Input.KeyCode.Name)
+              SetListening(false)
+            end
+          elseif not gameProcessed then
+            if Input.KeyCode == Funcs_Keybind.Value then
+              Callback(Funcs_Keybind.Value)
+            end
+          end
+        end)
+
+        function Funcs_Keybind:Set(KeyCode)
+          Funcs_Keybind.Value = KeyCode
+          KeybindLabel.Text = tostring(KeyCode.Name)
+        end
+
+        ItemCount += 1
+        return Funcs_Keybind
       end
 
       function Item:AddDropdown(Config)
@@ -2014,7 +2194,7 @@ function Speed_Library:CreateWindow(Config)
           TextSize = 12,
           BackgroundColor3 = Color3.fromRGB(0, 0, 0),
           BackgroundTransparency = 0.9,
-          BorderColor3 = Color3.fromRGB(255, 0, 0),
+          BorderColor3 = Color3.fromRGB(255, 30, 110),
           BorderSizePixel = 1,
           Size = UDim2.new(1, 0, 0, 20),
           Name = "SearchBar"
@@ -2209,4 +2389,20 @@ function Speed_Library:CreateWindow(Config)
   return Tabs
 end
 
-return Speed_Library
+function ZuperMing:SetTheme(ThemeName)
+  Custom:SetTheme(ThemeName)
+end
+
+function ZuperMing:AddTheme(ThemeName, Color)
+  Custom:AddTheme(ThemeName, Color)
+end
+
+function ZuperMing:GetThemes()
+  local list = {}
+  for k in pairs(Custom.Themes) do
+    table.insert(list, k)
+  end
+  return list
+end
+
+return ZuperMing
