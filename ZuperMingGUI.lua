@@ -9,9 +9,9 @@ local Custom = {} do
   Custom.ColorRGB = Color3.fromRGB(255, 30, 110)
 
   Custom.Themes = {
+	Grey    = Color3.fromRGB(160, 160, 160),
+	Cyan    = Color3.fromRGB(0, 180, 255),
     Magenta = Color3.fromRGB(255, 30, 110),
-    Cyan    = Color3.fromRGB(0, 180, 255),
-    Grey    = Color3.fromRGB(160, 160, 160),
   }
 
   Custom.ThemeListeners = {}
