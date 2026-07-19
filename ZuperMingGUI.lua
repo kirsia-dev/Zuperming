@@ -421,7 +421,8 @@ function ZuperMing:CreateWindow(Config)
     Size = UDim2.new(0, 455, 0, 350),
     ZIndex = 0,
     Name = "DropShadowHolder",
-    Position = UDim2.new(0, (ZuperMingGui.AbsoluteSize.X // 2 - 455 // 2), 0, (ZuperMingGui.AbsoluteSize.Y // 2 - 350 // 2))
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Position = UDim2.new(0.5, 0, 0.5, 0)
   }, ZuperMingGui)
 
   local DropShadow = Custom:Create("ImageLabel", {
@@ -518,7 +519,7 @@ function ZuperMing:CreateWindow(Config)
 
   local Min = Custom:Create("TextButton", {
     Font = Enum.Font.SourceSans,
-    Text = "-", 
+    Text = "—", 
     TextColor3 = Color3.fromRGB(255, 255, 255),
     TextSize = 18,
     AnchorPoint = Vector2.new(1, 0.5),
@@ -908,30 +909,28 @@ function ZuperMing:CreateWindow(Config)
             break
           end
         end
-
         if FrameChoose then break end
       end
-  
+
       if FrameChoose and Tab.LayoutOrder ~= LayersPageLayout.CurrentPage.LayoutOrder then
         for _, TabFrame in pairs(ScrollTab:GetChildren()) do
           if TabFrame.Name == "Tab" then
             TweenService:Create(TabFrame, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.InOut), {BackgroundTransparency = 0.999}):Play()
           end
         end
-  
-        local _TabT = TweenService:Create(Tab, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.InOut), {BackgroundTransparency = 0.92})
-        local _FTween = TweenService:Create(FrameChoose, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { Position = UDim2.new(0, 2, 0, 9 + (33 * Tab.LayoutOrder)) })
 
+        local _TabT = TweenService:Create(Tab, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.InOut), {BackgroundTransparency = 0.92})
         _TabT:Play()
-        _FTween:Play()
-  
+
+        FrameChoose.Parent = Tab
+        FrameChoose.Position = UDim2.new(0, 2, 0, 9)
+
         LayersPageLayout:JumpToIndex(Tab.LayoutOrder)
-  
+
         task.wait(0.05)
         NameTab.Text = _Name
-  
+
         TweenService:Create(FrameChoose, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(0, 1, 0, 20)}):Play()
-  
         task.wait(0.2)
         TweenService:Create(FrameChoose, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(0, 1, 0, 12)}):Play()
       end
