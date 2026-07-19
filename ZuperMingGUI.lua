@@ -2063,7 +2063,12 @@ function ZuperMing:CreateWindow(Config)
   local Title = Config[1] or Config.Title or ""
   local Description = Config[2] or Config.Description or ""
   local TabWidth = Config[3] or Config["Tab Width"] or 120
-  local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(550, 315)
+
+  local MinSizeX, MinSizeY = 400, 250
+  local MaxSizeX, MaxSizeY = 900, 600
+  local CurrentSizeX = 550
+  local CurrentSizeY = 315
+  local SizeUi = UDim2.fromOffset(CurrentSizeX, CurrentSizeY)
 
   local Funcs = {}
 
@@ -2320,6 +2325,82 @@ function ZuperMing:CreateWindow(Config)
   DropShadowHolder.Size = UDim2.new(0, 115 + TextLabel.TextBounds.X + 1 + TextLabel1.TextBounds.X, 0, 350)
 	MakeDraggable(Top, DropShadowHolder)
 
+  local ResizeHandle = Custom:Create("Frame", {
+    AnchorPoint = Vector2.new(1, 1),
+    BackgroundColor3 = Color3.fromRGB(100, 100, 100),
+    BackgroundTransparency = 0.5,
+    BorderSizePixel = 0,
+    Position = UDim2.new(1, 0, 1, 0),
+    Size = UDim2.new(0, 14, 0, 14),
+    ZIndex = 10,
+    Name = "ResizeHandle"
+  }, Main)
+
+  Custom:Create("UICorner", {
+    CornerRadius = UDim.new(0, 3)
+  }, ResizeHandle)
+
+  local ResizeIcon = Custom:Create("TextLabel", {
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    BackgroundTransparency = 1,
+    BorderSizePixel = 0,
+    Font = Enum.Font.GothamBold,
+    Position = UDim2.new(0.5, 0, 0.5, 0),
+    Size = UDim2.new(1, 0, 1, 0),
+    Text = "⇲",
+    TextColor3 = Color3.fromRGB(200, 200, 200),
+    TextSize = 11,
+    ZIndex = 11,
+    Name = "ResizeIcon"
+  }, ResizeHandle)
+
+  do
+    local resizeDragging = false
+    local resizeDragStart = nil
+    local resizeStartSizeX = nil
+    local resizeStartSizeY = nil
+
+    local function ApplyResize(newX, newY)
+      newX = math.clamp(newX, MinSizeX, MaxSizeX)
+      newY = math.clamp(newY, MinSizeY, MaxSizeY)
+
+      local newSize = UDim2.fromOffset(newX, newY)
+      Main.Size = newSize
+      DropShadow.Size = newSize
+
+      LayersTab.Size = UDim2.new(0, TabWidth, 1, -59)
+      Layers.Size = UDim2.new(1, -(TabWidth + 9 + 18), 1, -59)
+    end
+
+    ResizeHandle.InputBegan:Connect(function(input)
+      if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizeDragging = true
+        resizeDragStart = input.Position
+        resizeStartSizeX = Main.AbsoluteSize.X
+        resizeStartSizeY = Main.AbsoluteSize.Y
+
+        input.Changed:Connect(function()
+          if input.UserInputState == Enum.UserInputState.End then
+            resizeDragging = false
+          end
+        end)
+      end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+      if resizeDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - resizeDragStart
+        ApplyResize(resizeStartSizeX + delta.X, resizeStartSizeY + delta.Y)
+      end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+      if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizeDragging = false
+      end
+    end)
+  end
+
   Custom:RegisterThemeListener(function(Color)
     TextLabel1.TextColor3 = Color
     for _, s in pairs(ScrollTab:GetChildren()) do
@@ -2449,6 +2530,52 @@ function ZuperMing:CreateWindow(Config)
     Name = "DropPageLayout",
     Parent = DropdownFolder
   })
+
+  local Funcs = {}
+
+  -- Method untuk set ukuran UI secara manual
+  function Funcs:SetSize(newX, newY)
+    newX = math.clamp(newX or CurrentSizeX, MinSizeX, MaxSizeX)
+    newY = math.clamp(newY or CurrentSizeY, MinSizeY, MaxSizeY)
+    CurrentSizeX = newX
+    CurrentSizeY = newY
+    local newSize = UDim2.fromOffset(newX, newY)
+    local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    TweenService:Create(Main, tweenInfo, {Size = newSize}):Play()
+    TweenService:Create(DropShadow, tweenInfo, {Size = newSize}):Play()
+    LayersTab.Size = UDim2.new(0, TabWidth, 1, -59)
+    Layers.Size = UDim2.new(1, -(TabWidth + 9 + 18), 1, -59)
+  end
+
+  -- Method untuk scale UI (misalnya 1.2 = 20% lebih besar, 0.8 = 20% lebih kecil)
+  function Funcs:ScaleSize(factor)
+    factor = math.clamp(factor or 1, 0.5, 2)
+    local newX = math.clamp(math.floor(CurrentSizeX * factor), MinSizeX, MaxSizeX)
+    local newY = math.clamp(math.floor(CurrentSizeY * factor), MinSizeY, MaxSizeY)
+    Funcs:SetSize(newX, newY)
+  end
+
+  -- Method untuk besarin UI (naik per step)
+  function Funcs:Enlarge(step)
+    step = step or 50
+    Funcs:SetSize(CurrentSizeX + step, CurrentSizeY + step)
+  end
+
+  -- Method untuk kecilin UI (turun per step)
+  function Funcs:Shrink(step)
+    step = step or 50
+    Funcs:SetSize(CurrentSizeX - step, CurrentSizeY - step)
+  end
+
+  -- Method untuk reset ke ukuran default
+  function Funcs:ResetSize()
+    Funcs:SetSize(550, 315)
+  end
+
+  -- Method untuk dapatkan ukuran UI saat ini
+  function Funcs:GetSize()
+    return CurrentSizeX, CurrentSizeY
+  end
 
   local Tabs = {}
   local CountTab = 0
@@ -4072,7 +4199,8 @@ function ZuperMing:CreateWindow(Config)
     return Sections
   end
 
-  return Tabs
+  Tabs.Funcs = Funcs
+  return Tabs, Funcs
 end
 
 function ZuperMing:SetTheme(ThemeName)
