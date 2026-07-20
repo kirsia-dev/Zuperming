@@ -1022,6 +1022,7 @@ local Custom = {} do
 	["minimize-2"] = "rbxassetid://116269596042539",
 	["minimize"] = "rbxassetid://121304296213645",
 	["minus"] = "rbxassetid://118026365011536",
+	["misc"] = "rbxassetid://70386228443175",
 	["monitor-check"] = "rbxassetid://86651948439229",
 	["monitor-cloud"] = "rbxassetid://85931096038318",
 	["monitor-cog"] = "rbxassetid://94345128715799",
