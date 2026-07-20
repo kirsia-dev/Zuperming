@@ -2327,7 +2327,6 @@ local Tabs = {
     Shop = Window:CreateTab({ Name = "Shop", Icon = "shopping-bag" }),
     Mgmt= Window:CreateTab({ Name = "Storage", Icon = "archive" }),
     Finder = Window:CreateTab({ Name = "Finder", Icon = "search" }),
-    Input = Window:CreateTab({ Name = "Input", Icon = "rectangle-ellipsis" }),
     Webhook = Window:CreateTab({ Name = "Webhooks", Icon = "webhook" }),
     Misc = Window:CreateTab({ Name = "Miscellaneous", Icon = "setting" }),
     Settings = Window:CreateTab({ Name = "Settings", Icon = "settings" }),
@@ -2340,7 +2339,7 @@ end
 
 -- [FARM TAB]
 do
-	local HarvestGroup = Tabs.Farm:AddSection({ Title = "Harvesting" })
+	local HarvestGroup = Tabs.Farm:AddSection({ "Harvesting" })
 	HarvestGroup:AddDropdown({
 		Title = "Select Name",
 		Options = table.move(Const.SeedList, 1, #Const.SeedList, 2, { "All" }),
@@ -2402,7 +2401,7 @@ do
 		end,
 	})
 
-	local PlantGroup = Tabs.Farm:AddSection({ Title = "Planting" })
+	local PlantGroup = Tabs.Farm:AddSection({ "Planting" })
 	PlantGroup:AddDropdown({
 		Title = "Select Seed Name",
 		Options = table.move(Const.SeedList, 1, #Const.SeedList, 2, { "All" }),
@@ -2481,7 +2480,7 @@ do
 		end,
 	})
 
-	local SafetyGroup = Tabs.Farm:AddSection({ Title = "Movements" })
+	local SafetyGroup = Tabs.Farm:AddSection({ "Movements" })
 	SafetyGroup:AddDropdown({
 		Title = "Movement Method",
 		Options = { "Semi-Tween", "Teleport Instant" },
@@ -2499,7 +2498,7 @@ do
 		end,
 	})
 
-	local WaterGroup = Tabs.Farm:AddSection({ Title = "Watering" })
+	local WaterGroup = Tabs.Farm:AddSection({ "Watering" })
 	WaterGroup:AddDropdown({
 		Title = "Select Watering Can",
 		Options = { "Common Watering Can", "Super Watering Can" },
@@ -2529,7 +2528,7 @@ do
 		end,
 	})
 
-	local SprinklerGroup = Tabs.Farm:AddSection({ Title = "Sprinklers" })
+	local SprinklerGroup = Tabs.Farm:AddSection({ "Sprinklers" })
 	SprinklerGroup:AddDropdown({
 		Title = "Select Sprinkler",
 		Options = {
@@ -2565,7 +2564,7 @@ do
 		end,
 	})
 
-	local StealGroup = Tabs.Farm:AddSection({ Title = "Auto Stealing" })
+	local StealGroup = Tabs.Farm:AddSection({ "Auto Stealing" })
 	StealGroup:AddDropdown({
 		Title = "Steal Sort",
 		Options = { "Any", "Highest Value", "Lowest Value" },
@@ -2639,7 +2638,7 @@ do
 		end,
 	})
 
-	local CollectGroup = Tabs.Farm:AddSection({ Title = "Collecting" })
+	local CollectGroup = Tabs.Farm:AddSection({ "Collecting" })
 	CollectGroup:AddDropdown({
 		Title = "Mode",
 		Options = { "Collect All", "Collect & Back" },
@@ -2679,7 +2678,7 @@ do
 		end,
 	})
 
-	local EspGroup = Tabs.Farm:AddSection({ Title = "Visuals" })
+	local EspGroup = Tabs.Farm:AddSection({ "Visuals" })
 	EspGroup:AddToggle({
 		Title = "ESP Players",
 		Default = false,
@@ -2747,7 +2746,7 @@ end
 
 -- [SHOP TAB]
 do
-	local SellGroup = Tabs.Shop:AddSection({ Title = "Selling", })
+	local SellGroup = Tabs.Shop:AddSection({ "Selling", })
 	SellGroup:AddDropdown({
 		Title = "Select Fruit",
 		Options = table.move(Const.SeedList, 1, #Const.SeedList, 2, { "All" }),
@@ -2818,7 +2817,7 @@ do
 		end,
 	})
 
-	local BuyGroup = Tabs.Shop:AddSection({ Title = "Shopping" })
+	local BuyGroup = Tabs.Shop:AddSection({ "Shopping" })
 	BuyGroup:AddDropdown({
 		Title = "Select Seed/Pack",
 		Options = Const.SeedList,
@@ -2874,7 +2873,7 @@ do
 		end,
 	})
 
-	local GachaGroup = Tabs.Shop:AddSection({ Title = "Gacha & Loot" })
+	local GachaGroup = Tabs.Shop:AddSection({ "Gacha & Loot" })
 	GachaGroup:AddToggle({
 		Title = "Auto Open Seed Packs",
 		Default = false,
@@ -2928,7 +2927,7 @@ do
 		end,
 	})
 
-	local AuctionGroup = Tabs.Shop:AddSection({ Title = "Auction Sniper" })
+	local AuctionGroup = Tabs.Shop:AddSection({ "Auction Sniper" })
 	AuctionGroup:AddDropdown({
 		Title = "Filter by Category (0=all)",
 		Options = { "Seeds", "Crates", "Eggs", "SeedPacks", "Gear" },
@@ -2971,7 +2970,7 @@ end
 
 -- [MGMT TAB]
 do
-	local DoNGroup = Tabs.Mgmt:AddSection({ Title = "Double Or Nothing" })
+	local DoNGroup = Tabs.Mgmt:AddSection({ "Double Or Nothing" })
 	DoNGroup:AddSlider({
 		Title = "Target Wins (Cashout)",
 		Min = 1,
@@ -2994,7 +2993,7 @@ do
 		end,
 	})
 
-	local InvGroup = Tabs.Mgmt:AddSection({ Title = "Favorite / Unfavorite" })
+	local InvGroup = Tabs.Mgmt:AddSection({ "Favorite / Unfavorite" })
 	InvGroup:AddDropdown({
 		Title = "Select Fruit",
 		Options = table.move(Const.SeedList, 1, #Const.SeedList, 2, { "All" }),
@@ -3028,7 +3027,7 @@ do
 		end,
 	})
 
-	local MailGroup = Tabs.Mgmt:AddSection({ Title = "Mailbox & Gifts" })
+	local MailGroup = Tabs.Mgmt:AddSection({ "Mailbox & Gifts" })
 	MailGroup:AddToggle({
 		Title = "Auto Claim All Mailbox",
 		Default = false,
@@ -3065,7 +3064,7 @@ end
 
 -- [FINDER TAB]
 do
-	local FinderGroup = Tabs.Finder:AddSection({ Title = "Server & Pet Finder" })
+	local FinderGroup = Tabs.Finder:AddSection({ "Server & Pet Finder" })
 	FinderGroup:AddButton({
 		Title = "Launch Pet/Server Finder",
 		Callback = function()
@@ -3078,7 +3077,7 @@ end
 
 -- [WEBHOOK TAB]
 do
-	local WebGroup = Tabs.Webhook:AddSection({ Title = "Discord Webhook" })
+	local WebGroup = Tabs.Webhook:AddSection({ "Discord Webhook" })
 	WebGroup:AddInput({
 		Title = "Webhook URL",
 		PlaceHolder = "https://discord.com/api/webhooks/...",
@@ -3105,7 +3104,7 @@ end
 
 -- [MISC TAB]
 do
-	local MiscGroup = Tabs.Misc:AddSection({ Title = "Miscellaneous" })
+	local MiscGroup = Tabs.Misc:AddSection({ "Miscellaneous" })
 	MiscGroup:AddToggle({
 		Title = "Anti-AFK",
 		Default = true,
@@ -3130,7 +3129,7 @@ do
 			end
 		end,
 	})
-	local ExploitGroup = Tabs.Misc:AddSection({ Title = "Exploits" })
+	local ExploitGroup = Tabs.Misc:AddSection({ "Exploits" })
 	ExploitGroup:AddToggle({
 		Title = "God Mode",
 		Default = false,
@@ -3149,7 +3148,7 @@ do
 		end,
 	})
 
-	local UtilGroup = Tabs.Misc:AddSection({ Title = "Utility & Visuals" })
+	local UtilGroup = Tabs.Misc:AddSection({ "Utility & Visuals" })
 	UtilGroup:AddSlider({
 		Title = "WalkSpeed",
 		Min = 16,
@@ -3201,7 +3200,7 @@ end
 
 -- [SETTINGS TAB]
 do
-	local SystemGroup = Tabs.Settings:AddSection({ Title = "System" })
+	local SystemGroup = Tabs.Settings:AddSection({ "System" })
 	
 	SystemGroup:AddButton({
 		Title = "Unload Script",
