@@ -2304,9 +2304,17 @@ local ZuperMing = loadstring(game:HttpGet("https://raw.githubusercontent.com/kir
 
 ZuperMing:SetTheme("Grey")
 
-ZuperMing:SetNotification({
+local Window = ZuperMing:CreateWindow({
     Title = "ZuperMing",
-    Description = "| Grow A Garden",
+    Description = "| GaG 2 | v1.0",
+    ["Tab Width"] = 120,
+    Acrylic = false,
+    Theme = "Grey"
+})
+
+ZuperMing:SetNotification({
+    Title = "ZuperMing |",
+    Description = "Grow A Garden 2",
     Content = "Script loaded successfully!",
     Time = 0.5,
     Delay = 5,
