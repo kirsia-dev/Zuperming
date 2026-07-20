@@ -2315,7 +2315,7 @@ ZuperMing:SetNotification({
 -- [15] UI TABS & SECTIONS
 
 local Tabs = {
-    Farm = Window:CreateTabs({ Name = "Farming", Icon = "sprout" }),
+    Farm = Window:CreateTab({ Name = "Farming", Icon = "sprout" }),
     Shop = Window:CreateTab({ Name = "Shop", Icon = "shopping-bag" }),
     Mgmt= Window:CreateTab({ Name = "Storage", Icon = "archive" }),
     Finder = Window:CreateTab({ Name = "Finder", Icon = "search" }),
