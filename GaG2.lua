@@ -376,6 +376,14 @@ local State = {
 	webhookUrl = "",
 	webhookInterval = 60,
 
+	-- Webhook Shop
+	webhookGearEnabled = false,
+	webhookGearUrl = "",
+	webhookGearInterval = 300,
+	webhookSeedEnabled = false,
+	webhookSeedUrl = "",
+	webhookSeedInterval = 300,
+
 	-- Weather predictor
 	showWeather = true,
 	showGardenVal = false,
@@ -981,24 +989,63 @@ end
 function Features.startAutoWater()
 	stopFeature("autoWater")
 	local trove = getTrove("autoWater")
+
+	local rcParams = RaycastParams.new()
+	rcParams.FilterType = Enum.RaycastFilterType.Include
+
 	trove:AddThread(task.spawn(function()
 		while State.autoWater do
 			pcall(function()
-				local _, hrp, hum = Utils.getChar()
+				local char, hrp, hum = Utils.getChar()
 				local plot = Utils.getMyPlot()
-				if not (hrp and plot) then
+				if not (char and hrp and hum and plot) then
+					return
+				end
+				if hum.Health <= 0 then
 					return
 				end
 
-				local canTool, canAttr = Utils.getToolFromBackpack("WateringCan", { State.waterCan })
+				local canTool = char:FindFirstChildWhichIsA("Tool")
+				if not canTool then
+					canTool = LP:FindFirstChild("Backpack") and LP.Backpack:FindFirstChildWhichIsA("Tool")
+				end
 				if not canTool then
 					return
+				end
+				local canAttr = canTool:GetAttribute("WateringCan")
+				if not canAttr then
+					return
+				end
+				if State.waterCan and State.waterCan ~= "" and State.waterCan ~= "All Watering Cans" then
+					if string.lower(canAttr) ~= string.lower(State.waterCan) then
+						local found = nil
+						local foundAttr = nil
+						for _, cont in ipairs({ char, LP:FindFirstChild("Backpack") }) do
+							if cont then
+								for _, item in ipairs(cont:GetChildren()) do
+									local a = item:GetAttribute("WateringCan")
+									if a and string.lower(a) == string.lower(State.waterCan) then
+										found = item
+										foundAttr = a
+										break
+									end
+								end
+							end
+							if found then break end
+						end
+						if not found then return end
+						canTool = found
+						canAttr = foundAttr
+					end
 				end
 
 				local plantsFolder = plot:FindFirstChild("Plants")
 				if not plantsFolder then
 					return
 				end
+
+				local plantAreas = Collection:GetTagged("PlantArea")
+				rcParams.FilterDescendantsInstances = plantAreas
 
 				for _, plant in ipairs(plantsFolder:GetChildren()) do
 					if not State.autoWater then
@@ -1010,12 +1057,49 @@ function Features.startAutoWater()
 						local pPart = plant:IsA("Model") and plant.PrimaryPart
 							or plant:FindFirstChildWhichIsA("BasePart", true)
 						if pPart then
+							local origin = pPart.Position + Vector3.new(0, 5, 0)
+							local hit = workspace:Raycast(origin, Vector3.new(0, -20, 0), rcParams)
+							local firePos = hit and (hit.Position - Vector3.new(0, 0.3, 0))
+								or (pPart.Position - Vector3.new(0, 0.3, 0))
+
+							local equippedTool = char:FindFirstChildWhichIsA("Tool")
+							if not equippedTool or equippedTool ~= canTool then
+								canTool.Parent = char
+								task.wait(0.1)
+							end
+
 							Modules.Networking.WateringCan.UseWateringCan:Fire(
-								pPart.Position - Vector3.new(0, 0.3, 0),
+								firePos,
 								canAttr,
 								canTool
 							)
-							task.wait(0.15)
+							task.wait(0.55)
+
+							local newTool = char:FindFirstChildWhichIsA("Tool")
+							if newTool and newTool:GetAttribute("WateringCan") then
+								canTool = newTool
+								canAttr = newTool:GetAttribute("WateringCan")
+							else
+								local bt = LP:FindFirstChild("Backpack")
+								local refound = false
+								for _, cont in ipairs({ char, bt }) do
+									if cont then
+										for _, item in ipairs(cont:GetChildren()) do
+											local a = item:GetAttribute("WateringCan")
+											if a then
+												canTool = item
+												canAttr = a
+												refound = true
+												break
+											end
+										end
+									end
+									if refound then break end
+								end
+								if not refound then
+									break
+								end
+							end
 						end
 					end
 				end
@@ -1766,12 +1850,12 @@ end
 function Features.startUtilityLoop()
 	stopFeature("utilityLoop")
 	local trove = getTrove("utilityLoop")
-	trove:AddConnection(Svc.Run.Heartbeat:Connect(function()
+	trove:AddConnection(RunService.Heartbeat:Connect(function()
 		if State.walkSpeedEnabled and Cache.char and Cache.hum then
 			Cache.hum.WalkSpeed = State.walkSpeed
 		end
 		if State.instantPrompt then
-			for _, prompt in ipairs(Svc.Collection:GetTagged("ProximityPrompt")) do
+			for _, prompt in ipairs(Collection:GetTagged("ProximityPrompt")) do
 				prompt.HoldDuration = 0
 			end
 			-- Fallback
@@ -1821,7 +1905,7 @@ function Features.startGraphicOptimization()
 						obj.Transparency = 1
 					end
 				end
-				Svc.Lighting.GlobalShadows = false
+				Lighting.GlobalShadows = false
 			end
 			if State.noParticles then
 				for _, obj in ipairs(workspace:GetDescendants()) do
@@ -1835,7 +1919,144 @@ function Features.startGraphicOptimization()
 	trove:Add(restorePlants)
 end
 
--- [8.19] WEBHOOK
+-- [8.19] WEBHOOK GEAR SHOP
+function Features.startWebhookGearShop()
+	stopFeature("webhookGearShop")
+	local trove = getTrove("webhookGearShop")
+	local SM = RS:WaitForChild("SharedModules")
+	local GearShopData = require(SM:WaitForChild("GearShopData"))
+	local function sendGearWebhook()
+		if State.webhookGearUrl == "" then return end
+		local data = GearShopData and GearShopData.Data
+		if not data then return end
+		local fields = {}
+		for _, gear in ipairs(data) do
+			local name = gear.ItemName or "Unknown"
+			local rarity = gear.Rarity or "Common"
+			local price = gear.Price or gear.Cost or 0
+			local stock = gear.Stock
+			local stockText = stock ~= nil and tostring(stock) or "∞"
+			table.insert(fields, {
+				name = name,
+				value = string.format("Rarity: **%s**\nPrice: **¢%s**\nStock: **%s**", rarity, tostring(price), stockText),
+				inline = true,
+			})
+			if #fields >= 25 then break end
+		end
+		if #fields == 0 then return end
+		local payload = {
+			username = "ZuperMing | GAG2",
+			embeds = {{
+				title = "🔧 Gear Shop — Current Stock",
+				color = 0xF5C83C,
+				fields = fields,
+				footer = { text = "ZuperMing • Grow A Garden 2" },
+				timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+			}},
+		}
+		local req = syn and syn.request or request or http_request or (http and http.request)
+		if req then
+			pcall(function()
+				req({
+					Url = State.webhookGearUrl,
+					Method = "POST",
+					Headers = { ["Content-Type"] = "application/json" },
+					Body = Http:JSONEncode(payload),
+				})
+			end)
+		end
+	end
+	trove:AddThread(task.spawn(function()
+		while State.webhookGearEnabled do
+			sendGearWebhook()
+			task.wait(State.webhookGearInterval)
+		end
+	end))
+end
+
+-- [8.19.1] WEBHOOK SEED SHOP
+function Features.startWebhookSeedShop()
+	stopFeature("webhookSeedShop")
+	local trove = getTrove("webhookSeedShop")
+	local function getGuiStock(seedName)
+		local playerGui = LP:FindFirstChild("PlayerGui")
+		if not playerGui then return nil end
+		local shopGui = playerGui:FindFirstChild("SeedShop")
+		if not shopGui then return nil end
+		local frame = shopGui:FindFirstChild("Frame")
+		if not frame then return nil end
+		for _, child in ipairs(frame:GetDescendants()) do
+			local n = child:GetAttribute("SeedName") or child:GetAttribute("Seed")
+			if n and string.lower(n) == string.lower(seedName) then
+				local stock = child:GetAttribute("Stock")
+				if stock ~= nil then return tostring(stock) end
+			end
+		end
+		return nil
+	end
+	local function sendSeedWebhook()
+		if State.webhookSeedUrl == "" then return end
+		local normalFields = {}
+		local exclusiveFields = {}
+		for _, data in ipairs(Modules.SeedData) do
+			local seedName = data.SeedName
+			if not seedName then continue end
+			local rarity = data.Rarity or "Common"
+			local price = data.PurchasePrice or 0
+			local stockText = getGuiStock(seedName) or "∞"
+			local isExclusive = data.IsExclusive or data.Exclusive or false
+			local field = {
+				name = seedName,
+				value = string.format("Rarity: **%s**\nPrice: **¢%s**\nStock: **%s**", rarity, tostring(price), stockText),
+				inline = true,
+			}
+			if isExclusive then
+				if #exclusiveFields < 25 then table.insert(exclusiveFields, field) end
+			else
+				if #normalFields < 25 then table.insert(normalFields, field) end
+			end
+		end
+		local embeds = {}
+		if #normalFields > 0 then
+			table.insert(embeds, {
+				title = "🌱 Seed Shop — Normal Stock",
+				color = 0x28C828,
+				fields = normalFields,
+				footer = { text = "ZuperMing • Grow A Garden 2" },
+				timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+			})
+		end
+		if #exclusiveFields > 0 then
+			table.insert(embeds, {
+				title = "⭐ Seed Shop — Exclusive Stock",
+				color = 0xAA50E6,
+				fields = exclusiveFields,
+				footer = { text = "ZuperMing • Grow A Garden 2" },
+				timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+			})
+		end
+		if #embeds == 0 then return end
+		local req = syn and syn.request or request or http_request or (http and http.request)
+		if req then
+			pcall(function()
+				req({
+					Url = State.webhookSeedUrl,
+					Method = "POST",
+					Headers = { ["Content-Type"] = "application/json" },
+					Body = Http:JSONEncode({ username = "ZuperMing | GAG2", embeds = embeds }),
+				})
+			end)
+		end
+	end
+	trove:AddThread(task.spawn(function()
+		while State.webhookSeedEnabled do
+			sendSeedWebhook()
+			task.wait(State.webhookSeedInterval)
+		end
+	end))
+end
+
+-- [8.19.2] WEBHOOK
 function Features.startWebhook()
 	stopFeature("webhook")
 	local trove = getTrove("webhook")
@@ -1856,7 +2077,7 @@ function Features.startWebhook()
 					}
 					local req = syn and syn.request or request or http_request or (http and http.request)
 					if req then
-						req({Url = State.webhookUrl, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = Svc.Http:JSONEncode(data)})
+						req({Url = State.webhookUrl, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = Http:JSONEncode(data)})
 					end
 				end)
 			end
@@ -2003,7 +2224,7 @@ GlobalTrove:AddConnection(RunService.RenderStepped:Connect(function()
 					end
 
 					if #lines > 0 then
-						local key = "plant_" .. plant:GetAttribute("PlantId") or tostring(plant)
+						local key = "plant_" .. (plant:GetAttribute("PlantId") or tostring(plant))
 						activeKeys[key] = true
 						local d = getOrCreateDrawing(key)
 						d.Text = table.concat(lines, "\n")
@@ -2721,8 +2942,18 @@ do
 			State.waterPlant = toArr(v)
 		end,
 	})
+	WaterGroup:AddDropdown({
+		Title = "Select Mutation",
+		Options = Const.MutationList,
+		Default = { "Any" },
+		Multi = true,
+		Callback = function(v)
+			State.waterMut = toArr(v)
+		end,
+	})
 	WaterGroup:AddToggle({
 		Title = "Auto Water Plants",
+		Content = "Testing [Not Working]",
 		Default = false,
 		Callback = function(s)
 			State.autoWater = s
@@ -3319,6 +3550,70 @@ do
 			if s then Features.startWebhook() else stopFeature("webhook") end
 		end,
 	})
+
+	local GearWebGroup = WebhookTab:AddSection("Gear Shop Webhook", false)
+	GearWebGroup:AddInput({
+		Title = "Webhook URL",
+		Content = "https://discord.com/api/webhooks/...",
+		Callback = function(t) State.webhookGearUrl = t end,
+	})
+	GearWebGroup:AddInput({
+		Title = "Interval (Seconds)",
+		Content = "300",
+		Default = "300",
+		Callback = function(t)
+			local v = tonumber(t)
+			if v and v > 0 then State.webhookGearInterval = v end
+		end,
+	})
+	GearWebGroup:AddButton({
+		Title = "Send Now",
+		Callback = function()
+			Features.startWebhookGearShop()
+			task.wait(0.1)
+			stopFeature("webhookGearShop")
+		end,
+	})
+	GearWebGroup:AddToggle({
+		Title = "Enable Gear Shop Webhook",
+		Default = false,
+		Callback = function(s)
+			State.webhookGearEnabled = s
+			if s then Features.startWebhookGearShop() else stopFeature("webhookGearShop") end
+		end,
+	})
+
+	local SeedWebGroup = WebhookTab:AddSection("Seed Shop Webhook", false)
+	SeedWebGroup:AddInput({
+		Title = "Webhook URL",
+		Content = "https://discord.com/api/webhooks/...",
+		Callback = function(t) State.webhookSeedUrl = t end,
+	})
+	SeedWebGroup:AddInput({
+		Title = "Interval (Seconds)",
+		Content = "300",
+		Default = "300",
+		Callback = function(t)
+			local v = tonumber(t)
+			if v and v > 0 then State.webhookSeedInterval = v end
+		end,
+	})
+	SeedWebGroup:AddButton({
+		Title = "Send Now",
+		Callback = function()
+			Features.startWebhookSeedShop()
+			task.wait(0.1)
+			stopFeature("webhookSeedShop")
+		end,
+	})
+	SeedWebGroup:AddToggle({
+		Title = "Enable Seed Shop Webhook",
+		Default = false,
+		Callback = function(s)
+			State.webhookSeedEnabled = s
+			if s then Features.startWebhookSeedShop() else stopFeature("webhookSeedShop") end
+		end,
+	})
 end
 
 -- [MISC TAB]
@@ -3452,13 +3747,13 @@ do
 	})
 
 	SystemGroup:AddKeybind({
-    Title = "Toggle UI",
-    Default = Enum.KeyCode.RightShift,
-    InputType = "Keyboard",
-    Callback = function(Key)
-        toggleKey = Key
-    end,
-})
+        Title = "Toggle UI",
+        Default = Enum.KeyCode.RightShift,
+        InputType = "Keyboard",
+        Callback = function(Key)
+            toggleKey = Key
+        end,
+    })
 end
 
 -- [16] AUTO-START FEATURES
