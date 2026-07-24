@@ -708,7 +708,7 @@ end)
 -- [[UI Element]]
 local Tabs = {
     Discord = MainWindow:CreateTab({ Name = "Discord", Icon = "discord" }),
-    Main = MainWindow:CreateTab({ Name = "Main", Icon = "radar" }),
+    Main = MainWindow:CreateTab({ Name = "Main", Icon = "landmark" }),
     Player = MainWindow:CreateTab({ Name = "Players", Icon = "user" }),
     ESP = MainWindow:CreateTab({ Name = "Vidual", Icon = "eye" }),
     Survivor = MainWindow:CreateTab({ Name = "Survivor", Icon = "shield" }),
@@ -931,9 +931,7 @@ otherEsp:AddToggle({
     end 
 })
 
-
--- [[MAIN TAB]]
-local genVisual = Tabs.Generator:AddSection("Visual", false)
+local genVisual = Tabs.ESP:AddSection("Visual", false)
 
 genVisual:AddToggle({ 
     Title = "Master Turn On Object Chams", 
@@ -951,7 +949,10 @@ genVisual:AddToggle({
     end 
 })
 
-local genAuto = Tabs.Generator:AddSection("Automation", false)
+
+-- [[MAIN TAB]]
+
+local genAuto = Tabs.Main:AddSection("Automation", false)
 
 genAuto:AddToggle({ 
     Title = "AntiFail Generator", 
@@ -3171,7 +3172,7 @@ function SetupAntiFallDamage()
         end
     end)
 end
-pcall(SetupAntiFallDamage
+pcall(SetupAntiFallDamage)
 
 -- [[ANTI BLIND (Flashlight)]]
 function SetupAntiBlind()
@@ -3611,7 +3612,7 @@ local function UpdateObjectChams()
         end
     end
 
-    chamObj(Zuper_Cache.Generators, VD.ESP_Obj_Generator, Color3.fZuperB(0, 255, 255), Color3.new(1,1,1), 0.5)
+    chamObj(Zuper_Cache.Generators, VD.ESP_Obj_Generator, Color3.fromRGB(0, 255, 255), Color3.new(1,1,1), 0.5)
     chamObj(Zuper_Cache.Gates,      VD.ESP_Obj_Gate,      Color3.fromRGB(150,150,170), Color3.fromRGB(220,220,255), 0.5)
     chamObj(Zuper_Cache.Pallets,    VD.ESP_Obj_Pallet,    Color3.fromRGB(180,140,70),  Color3.fromRGB(255,210,130), 0.5)
     chamObj(Zuper_Cache.Windows,    VD.ESP_Obj_Window,    Color3.fromRGB(60,140,200),  Color3.fromRGB(120,200,255), 0.5)
