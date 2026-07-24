@@ -710,7 +710,7 @@ local Tabs = {
     Discord = MainWindow:CreateTab({ Name = "Discord", Icon = "discord" }),
     Main = MainWindow:CreateTab({ Name = "Main", Icon = "landmark" }),
     Player = MainWindow:CreateTab({ Name = "Players", Icon = "user" }),
-    ESP = MainWindow:CreateTab({ Name = "Vidual", Icon = "eye" }),
+    ESP = MainWindow:CreateTab({ Name = "Visual", Icon = "eye" }),
     Survivor = MainWindow:CreateTab({ Name = "Survivor", Icon = "shield" }),
     Killer = MainWindow:CreateTab({ Name = "Killer", Icon = "swords" }),
     Settings  = MainWindow:CreateTab({ Name = "Settings", Icon = "settings" }),
@@ -817,7 +817,7 @@ tpSection:AddButton({
 
 
 -- [[VISUAL TAB]]
-local basicEsp = Tabs.ESP:AddSection("Basic ESP", true)
+local basicEsp = Tabs.ESP:AddSection("Basic ESP", false)
 
 basicEsp:AddToggle({
     Title    = "Enable ESP",
