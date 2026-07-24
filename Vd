@@ -716,6 +716,18 @@ local Tabs = {
     Settings  = MainWindow:CreateTab({ Name = "Settings", Icon = "settings" }),
 }
 
+-- [[DISCORD TAB]]
+local Info = Tabs.Discord:AddSection("Information", true)
+
+Info:AddButton({
+    Title = "Discord",
+    Content = "Join Us!",
+    Callback = function()
+        local link = "https://discord.gg/V2S6dCzBX5"
+        if setclipboard then setclipboard(link) end
+    end,
+})
+
 -- [[PLAYER TAB]]
 local movSection = Tabs.Player:AddSection("Movement", false)
 
@@ -997,7 +1009,7 @@ radarSection:AddToggle({
     end 
 })
 
-local radarFilter = Tabs.Main:AddSection("Radar Filters", true)
+local radarFilter = Tabs.Main:AddSection("Radar Filters", false)
 
 radarFilter:AddToggle({ 
     Title = "Radar show Killer",
