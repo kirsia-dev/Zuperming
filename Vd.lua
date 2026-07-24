@@ -712,8 +712,8 @@ local Tabs = {
     Player = MainWindow:CreateTab({ Name = "Players", Icon = "user" }),
     ESP = MainWindow:CreateTab({ Name = "Vidual", Icon = "eye" }),
     Survivor = MainWindow:CreateTab({ Name = "Survivor", Icon = "shield" }),
-    Killer = MainWindow:CreateTab({ Name = "Killer", Icon = "danger" }),
-    Settings  = MainWindow:CreateTab({ Name = "Settings",     Icon = "settings" }),
+    Killer = MainWindow:CreateTab({ Name = "Killer", Icon = "swords" }),
+    Settings  = MainWindow:CreateTab({ Name = "Settings", Icon = "settings" }),
 }
 
 -- [[PLAYER TAB]]
