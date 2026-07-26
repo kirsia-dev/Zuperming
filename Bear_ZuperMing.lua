@@ -2571,15 +2571,24 @@ local function performClick()
     getgenv().AutoClickShootSettings.LastClickTime = currentTime
 end
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/kirsia-dev/Zuperming/refs/heads/main/ZuperMingGUI.lua"))()
+local ok, Library = pcall(function()
+    return loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/kirsia-dev/Zuperming/refs/heads/main/ZuperMingGUI.lua"
+    ))()
+end)
+
+if not ok or not Library then
+    error("[ZuperMing] Gagal load library: " .. tostring(Library))
+    return
+end
 
 Library:SetTheme("Grey")
 
 task.spawn(function()
     task.wait(2)
     Library:SetNotification({
-        Title = "Bear Hub",
-        Description = "| Farm",
+        Title = "ZuperMing",
+        Description = "| Blox Fruits",
         Content = "Script loaded successfully!",
         Time = 0.5,
         Delay = 5,
@@ -2587,8 +2596,8 @@ task.spawn(function()
 end)
 
 local MainWindow = Library:CreateWindow({
-    Title = "Bear Hub | Farm",
-    Description = "| by Quang Huy",
+    Title = "ZuperMing",
+    Description = "| Blox Fruits | 1.0",
     ["Tab Width"] = 120,
     Acrylic = false,
     Theme = "Grey"
