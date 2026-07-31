@@ -1,4 +1,3 @@
-
 -- [[ 1. CLEANUP & INIT ]] --
 if getgenv().ZuperMingActive then
     getgenv().ZuperMingActive = false
@@ -3153,9 +3152,6 @@ local function LoadMiscTab()
 
 end
 
--- //////////////////////////////////////////////////////////////
--- //////////////////// EXECUTE LOADERS /////////////////////////
--- //////////////////////////////////////////////////////////////
 LoadInfoTab()
 task.wait(0.05)
 LoadMainTab()
