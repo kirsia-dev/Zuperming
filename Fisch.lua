@@ -1613,7 +1613,7 @@ local snapMutationList = {
         local collected = {}
         local seen      = {}
 
-        local inventory = DataController.fetch("Inventory")
+        local inventory = DataController.PlayerDataReplicator:Index({"Inventory"})
         if not inventory then return collected end
 
         -- Kumpul UID dari filter nama
@@ -1734,7 +1734,7 @@ local snapMutationList = {
             end
         end
 
-        local inv = DataController.fetch("Inventory")
+        local inv = DataController.PlayerDataReplicator:Index({"Inventory"})
 
         for _, tool in pairs(sources) do
             if not tool:IsA("Tool") then continue end
