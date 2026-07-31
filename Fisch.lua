@@ -307,73 +307,106 @@ end
 -- ============================================================
 local shakeCooldown = {}
 
-RunService.RenderStepped:Connect(function()
-    local character = LocalPlayer.Character
-    local rod = getRod()
-    
-    -- [AUTO CAST]
-    if Config.AutoCast and rod then
-        -- Cek apakah remote events tersedia
-        if rod:FindFirstChild("events") and rod.events:FindFirstChild("castAsync") then
-            local charFolder = rod:FindFirstChild("char")
-            
-            -- Jika folder 'char' kosong, berarti pancingan sedang tidak dilempar
-            if not charFolder or #charFolder:GetChildren() == 0 then
-                task.spawn(function()
-                    pcall(function()
-                        -- Mengirim sinyal cast ke server
-                        rod.events.castAsync:InvokeServer(100, 1)
-                    end)
-                end)
-            end
-        end
-    end
-end)
+local function autoCastLoop()
+    task.spawn(function()
+        local Net = require(ReplicatedStorage:WaitForChild("packages"):WaitForChild("Net"))
+        local castRemote = Net:RemoteFunction("FishingRod/Cast", -1)
 
--- ============================================================
--- [AUTO SHAKE] center + random offset ±5px + cooldown per button
--- ============================================================
-task.spawn(function()
-    while true do
-        local shakeUI = PlayerGui:FindFirstChild("shakeui", true)
-
-        if shakeUI then
-            local safeZone = shakeUI:FindFirstChild("safezone")
-            if safeZone then
-                for _, button in pairs(safeZone:GetChildren()) do
-                    if button.Name == "button" and button:IsA("ImageButton") and button.Visible then
-
-                        -- Center + random offset ±5px
-                        if Config.AutoShake then
-                            button.AnchorPoint = Vector2.new(0.5, 0.5)
-                            local offsetX = math.random(-5, 5)
-                            local offsetY = math.random(-5, 5)
-                            button.Position = UDim2.new(0.5, offsetX, 0.5, offsetY)
-                            button.Size = UDim2.new(0, 50, 0, 50)
-                        end
-
-                        -- Cooldown per button 0.05s
-                        if Config.AutoShake then
-                            local now = tick()
-                            if not shakeCooldown[button] or (now - shakeCooldown[button]) > 0.05 then
-                                shakeCooldown[button] = now
-                                local shakeEvent = button:FindFirstChild("shake")
-                                if shakeEvent and shakeEvent:IsA("RemoteEvent") then
-                                    for i = 1, 3 do
-                                        pcall(function() shakeEvent:FireServer() end)
-                                    end
-                                end
-                            end
-                        end
-
-                    end
+        local function getRodTool()
+            local char = LocalPlayer.Character
+            if not char then return nil end
+            for _, tool in ipairs(char:GetChildren()) do
+                if tool:IsA("Tool") and tool.Name:lower():find("rod") then
+                    return tool
                 end
             end
+            return nil
         end
 
-        task.wait() -- Kecepatan maksimal scan
-    end
-end)
+        local function hasBobber(tool)
+            return tool:FindFirstChild("bobber") ~= nil
+        end
+
+        local function isCasted(tool)
+            local values = tool:FindFirstChild("values")
+            if not values then return false end
+            local casted = values:FindFirstChild("casted")
+            if not casted then return false end
+            return casted.Value == true
+        end
+
+        while true do
+            task.wait(0.3)
+            if not Config.AutoCast then continue end
+            local char = LocalPlayer.Character
+            if not char then continue end
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if not humanoid or humanoid.Health <= 0 then continue end
+            local tool = getRodTool()
+            if not tool then continue end
+            if hasBobber(tool) or isCasted(tool) then continue end
+
+            char:SetAttribute("Fishing", true)
+            char:SetAttribute("FishingWalkSpeed", 4)
+
+            local castSuccess = false
+            pcall(function()
+                castSuccess = castRemote:InvokeServer(95, true)
+            end)
+            if not castSuccess then
+                pcall(function()
+                    castSuccess = castRemote:InvokeServer(95, false)
+                end)
+            end
+            if not castSuccess then
+                char:SetAttribute("Fishing", nil)
+                char:SetAttribute("FishingWalkSpeed", nil)
+                task.wait(1)
+                continue
+            end
+
+            local waitStart = tick()
+            while Config.AutoCast do
+                task.wait(0.2)
+                local currentTool = getRodTool()
+                if not currentTool then break end
+                if not hasBobber(currentTool) and not isCasted(currentTool) then
+                    if tick() - waitStart > 30 then break end
+                    continue
+                end
+                break
+            end
+
+            waitStart = tick()
+            while Config.AutoCast do
+                task.wait(0.3)
+                local currentTool = getRodTool()
+                if not currentTool then break end
+                if not hasBobber(currentTool) and not isCasted(currentTool) then break end
+                if tick() - waitStart > 90 then break end
+            end
+
+            char:SetAttribute("Fishing", nil)
+            char:SetAttribute("FishingWalkSpeed", nil)
+            task.wait(0.5)
+        end
+    end)
+end
+
+local function autoShakeLoop()
+    task.spawn(function()
+        local shakeRemote = ReplicatedStorage.packages.Net["RE/LureShake/Shake"]
+        while Config.AutoShake do
+            pcall(function()
+                shakeRemote:FireServer()
+            end)
+            task.wait(0.3)
+        end
+    end)
+end
+
+task.spawn(autoCastLoop)
+task.spawn(autoShakeLoop)
 
 -- ============================================================
 -- [INSTANT BOBBER] - Logic terpisah
