@@ -1574,7 +1574,7 @@ local snapMutationList = {
     local function BuildFishNames()
         FishByName = {}
 
-        local inventory = DataController.fetch("Inventory")
+        local inventory = DataController.PlayerDataReplicator:Index({"Inventory"})
         if not inventory then
             warn("[AutoFav] Inventory nil!")
             return
