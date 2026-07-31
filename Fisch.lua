@@ -216,8 +216,8 @@ local function RunAutoSell()
 end
 
 -- > Auto Spear Logic
-local SpearEvent = ReplicatedStorage:WaitForChild("packages"):WaitForChild("Net"):WaitForChild("RE/SpearFishing/Minigame")
-local SpearWaterFolder = Workspace:WaitForChild("Spearfishing Water", 5)
+local CollectionService = game:GetService("CollectionService")
+local SpearRemote = game.ReplicatedStorage.packages.Net["RF/SpearFishing/Minigame"]
 
 -- Daftar lokasi spearfishing
 local SpearLocations = {
@@ -228,42 +228,67 @@ local SpearLocations = {
     ["Crowned Ruins"] = CFrame.new(3050.45, -1137.82, 2062.73) * CFrame.Angles(math.rad(-180.00), math.rad(7.32), math.rad(-180.00)),
 }
 
--- Default lokasi
 Config.AutoSpearLocation = "Lost Jungle"
 
 local function RunAutoSpear()
-    -- Teleport ke lokasi yang dipilih saat pertama jalan
+    -- Teleport ke lokasi yang dipilih
     local targetCFrame = SpearLocations[Config.AutoSpearLocation]
     if targetCFrame then
         local char = LocalPlayer.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
             char.HumanoidRootPart.CFrame = targetCFrame
-            task.wait(0.5) -- Tunggu sebentar setelah teleport
+            task.wait(1)
         end
     end
 
     while Config.AutoSpear and getgenv().ZuperMingActive do
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then task.wait(1) continue end
+
         local foundAnyFish = false
-        if SpearWaterFolder then
-            for _, waterChild in ipairs(SpearWaterFolder:GetChildren()) do
-                if not Config.AutoSpear then break end
-                local zoneFish = waterChild:FindFirstChild("ZoneFish")
-                if zoneFish then
-                    for _, fish in ipairs(zoneFish:GetChildren()) do
-                        if not Config.AutoSpear then break end
-                        local currentUID = fish:GetAttribute("UID") or (fish:FindFirstChild("UID") and fish.UID.Value)
-                        if currentUID then
-                            foundAnyFish = true
-                            task.spawn(function() SpearEvent:FireServer(currentUID) end)
-                            task.wait(1.1)
-                            task.spawn(function() SpearEvent:FireServer(currentUID, true) end)
-                        end
+
+        -- Cek SpearfishingZone (cara yang benar dari decompile)
+        for _, zone in CollectionService:GetTagged("SpearfishingZone") do
+            if not Config.AutoSpear then break end
+            local zoneFish = zone:FindFirstChild("ZoneFish")
+            if zoneFish then
+                for _, fish in ipairs(zoneFish:GetChildren()) do
+                    if not Config.AutoSpear then break end
+                    local uid = fish:GetAttribute("UID")
+                    if uid then
+                        foundAnyFish = true
+                        pcall(function()
+                            SpearRemote:InvokeServer(uid, nil, false)
+                        end)
+                        task.wait(1.5)
                     end
                 end
             end
         end
+
+        -- Fallback: cek roaming fish kalau tidak ada di zone
+        if not foundAnyFish then
+            local params = OverlapParams.new()
+            local roaming = workspace:FindFirstChild("active") and workspace.active:FindFirstChild("roamingFish")
+            if roaming then
+                params.IncludeInstances = { roaming }
+                local parts = workspace:GetPartBoundsInRadius(hrp.Position, 12, params)
+                for _, part in parts do
+                    if not Config.AutoSpear then break end
+                    local uid = part:GetAttribute("UID")
+                    if uid then
+                        foundAnyFish = true
+                        pcall(function()
+                            SpearRemote:InvokeServer(uid, nil, true)
+                        end)
+                        task.wait(1.5)
+                    end
+                end
+            end
+        end
+
         if not foundAnyFish then task.wait(1.5) end
-        task.wait(0.5)
+        task.wait(0.3)
     end
 end
 
