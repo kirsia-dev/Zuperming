@@ -49,7 +49,6 @@ _G.Settings = {
         ["Auto Lost Child3 Quest"] = false,
         ["Auto Lost Child4 Quest"] = false,
     },
-    Crafting = {},
     Teleport = {
         ["Selected Item"] = "Revolver"
     },
@@ -2080,9 +2079,11 @@ lost1Section:AddToggle({
 local bodyVelocity = Instance.new("BodyVelocity")
 local bodyGyro = Instance.new("BodyGyro")
 local flySpeed = 50
+
 bodyVelocity.Velocity = Vector3.new(0, 0, 0)
 bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
 bodyGyro.MaxTorque = Vector3.new(100000, 100000, 100000)
+
 function fly()
     bodyVelocity.Parent = hrp
     bodyGyro.Parent = hrp
@@ -2094,6 +2095,7 @@ function fly()
     end)
     return hoverConnection
 end
+
 function unfly(hoverConnection)
     if hoverConnection then hoverConnection:Disconnect() end
     bodyVelocity.Parent = nil
