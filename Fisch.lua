@@ -407,7 +407,6 @@ task.spawn(function()
 end)
 
 task.spawn(autoCastLoop)
-task.spawn(autoShakeLoop)
 
 -- ============================================================
 -- [INSTANT BOBBER] - Logic terpisah
