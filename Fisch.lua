@@ -44,17 +44,16 @@ local Config = {
     SnapShinyType = "None",
     SnapMutation  = "None",
 
-    -- Hapus Config.TotemName, ganti dengan ini:
     AutoTotem = false,
     TotemDay = "None",
     TotemNight = "None",
-    TotemDelay = 60, -- Default delay 60 detik
+    TotemDelay = 60,
     TotemBusy = false,
     TotemActive = false,
 
     AutoAppraise = false,
     ShinyType = "None",
-    TargetSize = "None", -- Tambahan untuk filter Big
+    TargetSize = "None",
     TargetMutation = "None",
 
     -- Identity
