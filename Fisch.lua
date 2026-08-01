@@ -399,7 +399,7 @@ task.spawn(function()
             pcall(function()
                 shakeRemote:FireServer()
             end)
-            task.wait(3)
+            task.wait(0.3)
         else
             task.wait(0.2)
         end
@@ -615,7 +615,7 @@ local function GetCurrentTimeOfDay()
             return "Day"
         end
     end
-    return "Day" -- Default kalau UI belum loading
+    return "Day"
 end
 
 -- ============================================================
