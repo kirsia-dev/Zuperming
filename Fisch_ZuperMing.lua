@@ -2092,6 +2092,20 @@ local Window = Library:Window({Footer = "Fisch - 1.4"})
 -- //////////////////////////////////////////////////////////////
 -- //////////////////// LOAD TABS ///////////////////////////////
 -- //////////////////////////////////////////////////////////////
+local function LoadDiscordTab()
+    local DiscordTab = Window:AddTab({ Name = "Discord", Icon = "rbxassetid://94434236999817" })
+    local DiscordSection = DiscordTab:AddSection("Information", true)
+
+    DiscordSection:AddButton({
+        Title = "Discord",
+        Callback = function()
+            local link = "https://discord.gg/V2S6dCzBX5"
+            if setclipboard then setclipboard(link)
+            end
+        end
+    })
+end
+
 local function LoadInfoTab()
     local InfoTab = Window:AddTab({ Name = "Info", Icon = "info" })
     local EventSection = InfoTab:AddSection("Active Events Status", true)
@@ -3210,6 +3224,7 @@ local function LoadMiscTab()
     })
 
 end
+
 
 LoadInfoTab()
 task.wait(0.05)
