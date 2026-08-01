@@ -399,7 +399,7 @@ task.spawn(function()
             pcall(function()
                 shakeRemote:FireServer()
             end)
-            task.wait(0.1)
+            task.wait(3)
         else
             task.wait(0.2)
         end
@@ -701,7 +701,6 @@ local function ToggleRadar(state)
                             local obj = folder:FindFirstChild(name)
                             if obj then
                                 pcall(function()
-                                    -- Paksa jadi TRUE
                                     if obj:IsA("BoolValue") then obj.Value = true end
                                     obj.Enabled = true
                                 end)
@@ -709,7 +708,7 @@ local function ToggleRadar(state)
                         end
                     end
                 end
-                task.wait(1) -- Cek setiap detik
+                task.wait(1)
             end
         end)
         print("Radar Bypass: ON")
@@ -3181,7 +3180,7 @@ local function LoadMiscTab()
         pcall(function()
             AntiAfk.conn = LocalPlayer.Idled:Connect(function()
                 VirtualUser:CaptureController()
-                VirtualUser:ClickButton2(Vector2.new()) -- Klik Virtual saat Idle
+                VirtualUser:ClickButton2(Vector2.new())
             end)
             VirtualUser:CaptureController()
         end)
