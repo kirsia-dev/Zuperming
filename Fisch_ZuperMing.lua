@@ -3225,7 +3225,8 @@ local function LoadMiscTab()
 
 end
 
-
+LoadDiscordTab()
+task.wait(0.05)
 LoadInfoTab()
 task.wait(0.05)
 LoadMainTab()
