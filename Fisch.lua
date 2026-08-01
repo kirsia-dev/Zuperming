@@ -392,17 +392,19 @@ local function autoCastLoop()
     end)
 end
 
-local function autoShakeLoop()
-    task.spawn(function()
-        local shakeRemote = ReplicatedStorage.packages.Net["RE/LureShake/Shake"]
-        while Config.AutoShake do
+task.spawn(function()
+    local shakeRemote = ReplicatedStorage.packages.Net["RE/LureShake/Shake"]
+    while getgenv().ZuperMingActive do
+        if Config.AutoShake then
             pcall(function()
                 shakeRemote:FireServer()
             end)
-            task.wait(0.3)
+            task.wait(0.1)
+        else
+            task.wait(0.2)
         end
-    end)
-end
+    end
+end)
 
 task.spawn(autoCastLoop)
 task.spawn(autoShakeLoop)
