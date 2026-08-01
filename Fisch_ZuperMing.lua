@@ -2092,19 +2092,6 @@ local Window = Library:Window({Footer = "Fisch - 1.4"})
 -- //////////////////////////////////////////////////////////////
 -- //////////////////// LOAD TABS ///////////////////////////////
 -- //////////////////////////////////////////////////////////////
-local function LoadDiscordTab()
-    local DiscordTab = Window:AddTab({ Name = "Discord", Icon = "rbxassetid://94434236999817" })
-    local DiscordSection = DiscordTab:AddSection("Information", true)
-
-    DiscordSection:AddButton({
-        Title = "Discord",
-        Callback = function()
-            local link = "https://discord.gg/V2S6dCzBX5"
-            if setclipboard then setclipboard(link)
-            end
-        end
-    })
-end
 
 local function LoadInfoTab()
     local InfoTab = Window:AddTab({ Name = "Info", Icon = "info" })
@@ -2167,6 +2154,24 @@ local function LoadMainTab()
         Callback = function(v)
             Config.InstantBobber = v
         end
+    })
+
+    local SellSection = MainTab:AddSection("Selling Config")
+
+    SellSection:AddInput({ 
+        Title = "Sell Interval (s)", 
+        Default = "5", 
+        Callback = function(v) Config.SellInterval = tonumber(v) end 
+    })
+    
+    SellSection:AddToggle({ 
+        Title = "Enable Auto Sell", 
+        Content = "Fire Remote SellAll Only", 
+        Default = false, 
+        Callback = function(v) 
+            Config.AutoSell = v 
+            if v then task.spawn(RunAutoSell) end 
+        end 
     })
 
     local SnapSection = MainTab:AddSection("Snap Reel")
@@ -2277,7 +2282,6 @@ end
 
 local function LoadAutoTab()
     local AutoTab = Window:AddTab({ Name = "Auto", Icon = "auto" })
-    local SellSection = AutoTab:AddSection("Selling Config")
     local AutoAppraise = AutoTab:AddSection("Auto Appraise")
     local TotemSection = AutoTab:AddSection("Auto Totem")
     local EnchantSection = AutoTab:AddSection("Auto Enchant System")
@@ -2285,22 +2289,6 @@ local function LoadAutoTab()
     local StorageSection = AutoTab:AddSection("Auto Fish Storage")
     local ChestSection = AutoTab:AddSection("Auto Collect All Chest")
     local AutoSection = AutoTab:AddSection("Auto Collect All Starfall")
-
-    SellSection:AddInput({ 
-        Title = "Sell Interval (s)", 
-        Default = "5", 
-        Callback = function(v) Config.SellInterval = tonumber(v) end 
-    })
-    
-    SellSection:AddToggle({ 
-        Title = "Enable Auto Sell", 
-        Content = "Fire Remote SellAll Only", 
-        Default = false, 
-        Callback = function(v) 
-            Config.AutoSell = v 
-            if v then task.spawn(RunAutoSell) end 
-        end 
-    })
 
     -- Dropdown 1: Tier
     AutoAppraise:AddDropdown({
@@ -3225,8 +3213,6 @@ local function LoadMiscTab()
 
 end
 
-LoadDiscordTab()
-task.wait(0.05)
 LoadInfoTab()
 task.wait(0.05)
 LoadMainTab()
