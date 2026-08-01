@@ -2087,7 +2087,7 @@ local snapMutationList = {
 -- [[ 5. UI CONSTRUCTION ]] --
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/vandawam/Aesthetic-Product-Showcase-frnt/refs/heads/main/itulah.lua"))()
 
-local Window = Library:Window({Footer = "Fisch - 1.25"})
+local Window = Library:Window({Footer = "Fisch - 1.4"})
 
 -- //////////////////////////////////////////////////////////////
 -- //////////////////// LOAD TABS ///////////////////////////////
