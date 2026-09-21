@@ -7,11 +7,11 @@ local StarterGui = game:GetService("StarterGui")
 local gameScripts = {
     [10200395747] = {
         name = "Grow A Garden 2",
-        Zuper = "https://raw.githubusercontent.com/kirsia-dev/Zuperming/refs/heads/main/GaG2-obfuscated.lua"
+        Zuper = "https://raw.githubusercontent.com/kirsia-dev/Zuperming/refs/heads/main/GaG2-obfuscated.luau"
     },
     [6739698191] = {
         name = "Violence District",
-        Zuper = "https://raw.githubusercontent.com/kirsia-dev/Zuperming/refs/heads/main/Vd-obfuscated.lua"
+        Zuper = "https://raw.githubusercontent.com/kirsia-dev/Zuperming/refs/heads/main/Vd-obfuscated.luau"
     }
 }
 
@@ -39,5 +39,4 @@ else
         Text = "Game not supported!",
         Duration = 4
     })
-    game.Players.LocalPlayer:Kick("Game not supported!")
 end
