@@ -1,0 +1,1 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/kirsia-dev/Zuperming/refs/heads/main/Loader.lua"))()
