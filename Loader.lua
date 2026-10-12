@@ -55,8 +55,9 @@ Library.Scheme.OutlineColor = Color3.fromRGB(40, 40, 40)
 Library.Scheme.AccentColor = Blue
 
 local Window = Library:CreateWindow({
-    Title = "ZuperMing - Fisch",
+    Title = "ZuperMing",
     Footer = "Key System - discord.gg/wpubHwymwQ",
+    Icon = "rbxassetid://70406385102253",
     NotifySide = "Right",
     ShowCustomCursor = false,
 })
