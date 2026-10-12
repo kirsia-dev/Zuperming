@@ -12,7 +12,7 @@ end
 local api = loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
 api.script_id = "f4637e4007980627b00ad48cf9370ea2"
 
-local KEY_LINK = "YOUR_KEY_LINK"
+local KEY_LINK = "https://ads.luarmor.net/get_key?for=ZuperMing_Key_System-KVDvgpeRMuoW"
 local DISCORD = "https://discord.gg/wpubHwymwQ"
 local FILE = "ZuperMing_Key.txt"
 
